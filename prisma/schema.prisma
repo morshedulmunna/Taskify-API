@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String  @id @default(cuid())
+  name     String?
+  email    String
+  password String
+
+  UserInfo UserInfo[]
+  Group    Group[]
+
+  Task   Task?   @relation(fields: [taskId], references: [id])
+  taskId String?
+
+  create_at DateTime @default(now())
+  update_at DateTime @updatedAt
+}
+
+model UserInfo {
+  id        String  @id @default(cuid())
+  full_name String
+  title     String
+  summery   String
+  image     String?
+
+  registerId String
+  register   User   @relation(fields: [registerId], references: [id])
+
+  create_at DateTime @default(now())
+  update_at DateTime @updatedAt
+}
+
+model Group {
+  id     String   @id @default(cuid())
+  name   String
+  member String[]
+
+  registerId   String
+  created_user User   @relation(fields: [registerId], references: [id])
+
+  create_at DateTime @default(now())
+  update_at DateTime @updatedAt
+}
+
+enum Status {
+  new_task
+  processing
+  completed
+}
+
+enum Priority {
+  normal
+  medium
+  urgent
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  asign_to    User[]
+  status      Status   @default(new_task)
+  dure_date   DateTime
+  priorty     Priority @default(normal)
+
+  create_at DateTime @default(now())
+  update_at DateTime @updatedAt
+}
